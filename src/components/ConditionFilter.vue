@@ -5,24 +5,34 @@
       <input type="text" v-model="address">
     </div>
     <div class="zone border-bottom mb-5">
+<!--  篩選地區 -->
       <h3>地區</h3>
-      <el-select v-model="zone" clearable placeholder="请选择" @change="searchZone">
+
+      <el-select 
+          v-model="zone" 
+          clearable 
+          placeholder="请选择" 
+          @change="searchZone">
+
         <el-option
           v-for="zone in zoneList"
           :key="zone"
           :label="zone"
           :value="zone">
         </el-option>
+
       </el-select>
     </div>
     <div class="fee border-bottom mb-5">
       <h3>收費</h3>
+
       <el-switch
         @change="handleCharge"
         v-model="charge"
         active-text="付費"
         inactive-text="免費">
       </el-switch>
+
     </div>
     <div class="opentime">
       <h3>開放時間</h3>

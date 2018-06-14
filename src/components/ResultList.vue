@@ -3,7 +3,7 @@
     <!-- 分頁 -->
     <div class="row">
       <el-pagination
-        class="mx-auto m-5"
+        class="mx-auto mb-3"
         background
         layout=" prev, pager, next ,total" 
         :total="searchResult.length" 
@@ -30,7 +30,7 @@ export default {
   props: ["searchResult"], //傳入搜尋結果array
   data() {
     return {
-      pageSize: 5,
+      pageSize: 6,
       currPage: 1
     };
   },

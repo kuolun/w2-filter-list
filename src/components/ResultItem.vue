@@ -1,12 +1,15 @@
 <template>
     <li>
-      <img :src="resultItem.Picture1" >
+      <div>
+        <img :src="resultItem.Picture1" >
+      </div>
       <div>
         <h4>{{resultItem.Name}}</h4>
-        <p>{{resultItem.Description}}</p>
+        <p>{{resultItem.Description.slice(0,62)}}</p>
         <span><i class="fas fa-map-marker-alt"></i>{{resultItem.Zone}}</span>
         <span class="ml-5"><i class="fas fa-map-signs"></i>{{resultItem.Add}}</span>
-        <p><i class="far fa-calendar-alt"></i>{{resultItem.Opentime}}</p>
+        <p class="mt-2"><i class="far fa-calendar-alt"></i>{{resultItem.Opentime}}</p>
+        <p><i class="fas fa-dollar-sign"></i>{{(resultItem.Ticketinfo==="")?"免費參觀":resultItem.Ticketinfo}}</p>
       </div>
 
   </li>
@@ -35,8 +38,9 @@ h4 {
 }
 p {
   width: 520px;
-  height: 50px;
+  height: 60px;
   overflow: hidden;
+  margin: 0;
 }
 </style>
 

@@ -6,9 +6,8 @@
       <i class="fas fa-search"></i>
       <!-- 輸入搜尋字串 -->
       <!-- 有結果顯示幾筆，沒結果顯示無 -->
-      <input type="text" v-model="searchTerm" >
-      <p v-if="filterBySearch.length">搜尋結果有{{filterBySearch.length}}筆</p>
-      <p v-else>無搜尋結果</p>
+      <input type="text" v-model="searchTerm" @input="searchKeyword">
+      <p v-if="countRecords">搜尋結果有{{countRecords}}筆</p>
     </header>
 
     <div class="container">
@@ -21,7 +20,7 @@
           @handleCharge="handleCharge"/>
         <!-- 右邊顯示結果 -->
         <ResultList 
-          :searchResult="filterBySearch" />
+          :searchResult="filteredData ? filteredData : apiData" />
 
       </div>
     </div>
@@ -35,7 +34,7 @@ import ConditionFilter from "./components/ConditionFilter";
 import ResultList from "./components/ResultList";
 
 const API =
-  "https://data.kcg.gov.tw/api/action/datastore_search?resource_id=92290ee5-6e61-456f-80c0-249eae2fcc97&limit=88";
+  "https://data.kcg.gov.tw/api/action/datastore_search?resource_id=92290ee5-6e61-456f-80c0-249eae2fcc97&limit=200";
 
 export default {
   name: "app",
@@ -47,6 +46,7 @@ export default {
     // 抓API資料
     axios.get(API).then(res => {
       this.apiData = res.data.result.records;
+      this.filteredData = this.apiData;
 
       // 抓出所有行政區資料
       this.apiData.forEach((item, idx) => {
@@ -55,54 +55,81 @@ export default {
           this.zoneList.push(item.Zone);
         }
       });
+      //設定為免費
+      this.handleCharge(false);
     });
   },
   data() {
     return {
+      apiData: [], //api來源資料
       searchTerm: "", //關鍵字search
-      apiData: [], //api資料
-      zoneList: [],
-      filteredData: []
+      addressTerm: "", //地址
+      zoneList: [], //地區list
+      selectedZone: "", //選擇地區
+      filteredData: [], //過濾後資料
+      charge: false, //收費與否
+      dateTime: 0 //開放時間
     };
   },
   filters: {},
   computed: {
-    //回傳關鍵字搜尋的結果
-    filterBySearch() {
+    countRecords() {
+      if (this.searchTerm) {
+        return this.filteredData.length;
+      } else {
+        return false;
+      }
+    }
+  },
+  methods: {
+    //處理filter條件
+    searchKeyword() {
       let searchTerm = this.searchTerm;
+      // let selectedZone = this.selectedZone;
+      // let charge = this.charge;
       let data = this.apiData;
 
-      if (!searchTerm) {
-        return data;
-      } else {
+      //如果有輸入input search
+      if (searchTerm) {
         // searchTerm有值，則過濾比對每一筆的Name跟Description
-        return data.filter(item => {
+        this.filteredData = data.filter(item => {
           return (
             item.Name.includes(searchTerm) ||
             item.Description.includes(searchTerm)
           );
         });
       }
-    }
-  },
-  methods: {
+    },
     handleCharge(val) {
       console.log(val);
       // true是有收費
       if (val) {
-        this.searchResult = this.apiData.filter(item => {
-          return item.Ticketinfo !== "免費參觀";
+        console.log("收費");
+        this.filteredData = this.apiData.filter(item => {
+          return item.Ticketinfo !== "免費參觀" && item.Ticketinfo !== "";
         });
       } else {
+        console.log("免費");
+        this.filteredData = this.apiData.filter(item => {
+          return item.Ticketinfo === "免費參觀" || item.Ticketinfo === "";
+        });
+        console.log(this.filteredData);
       }
     },
+    // 選完地區後觸發
     searchZone(zone) {
+      console.log(zone);
       if (zone) {
+        // let test;
         this.filteredData = this.apiData.filter(item => {
+          console.log(item.Zone);
           return item.Zone === zone;
         });
+        // console.log(test);
+        // this.filteredData = test;
       } else {
-        this.filteredData = this.apiData;
+        //全部地區
+        this.filteredData = null;
       }
     }
   }

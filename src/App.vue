@@ -4,38 +4,25 @@
     <header class="p-3">
       <h2>HaveFun</h2>
       <i class="fas fa-search"></i>
+      <!-- 輸入搜尋字串 -->
+      <!-- 有結果顯示幾筆，沒結果顯示無 -->
       <input type="text" v-model="searchTerm" >
-      <p v-if="searchResult">搜尋結果有{{searchResult.length}}筆</p>
+      <p v-if="filterBySearch.length">搜尋結果有{{filterBySearch.length}}筆</p>
+      <p v-else>無搜尋結果</p>
     </header>
-    <!-- 分頁 -->
-    <div class="row">
-      <el-pagination
-        class="mx-auto m-5"
-        background
-        layout=" prev, pager, next ,total" 
-        :total="searchResult.length" 
-        :page-size="pageSize"
-        :current-page.sync="currentPage"
-        @current-change="handleCurrentChange">
-      </el-pagination>
-    </div>
+
     <div class="container">
       <div class="row">
-        <ConditionFilter :zoneList="zoneList" 
-        @searchZone="searchZone"
-        @handleCharge="handleCharge"/>
-        <ResultList :searchResult="covert_to_pageData" v-if="apiData_by_page"/>
-        <ResultList :searchResult="apiData" v-else/>
-        <!-- 分頁 -->
-        <el-pagination
-          class="mx-auto m-5"
-          background
-          layout=" prev, pager, next ,total" 
-          :total="searchResult.length" 
-          :page-size="pageSize"
-          :current-page.sync="currentPage"
-          @current-change="handleCurrentChange">
-        </el-pagination>
+        <!-- 左邊下搜尋條件 地址/地區/收費-->
+        <!-- 由child comp上傳選擇event -->
+        <ConditionFilter 
+          :zoneList="zoneList" 
+          @searchZone="searchZone"
+          @handleCharge="handleCharge"/>
+        <!-- 右邊顯示結果 -->
+        <ResultList 
+          :searchResult="filterBySearch" />
+
       </div>
     </div>
   </div>
@@ -68,28 +55,34 @@ export default {
           this.zoneList.push(item.Zone);
         }
       });
-
-      //初始化
-      this.searchResult = this.apiData;
-      //設定第一頁
-      this.handleCurrentChange(1);
     });
   },
   data() {
     return {
-      searchTerm: "",
-      apiData: [],
-      searchResult: [],
+      searchTerm: "", //關鍵字search
+      apiData: [], //api資料
       zoneList: [],
-      pageSize: 5,
-      apiData_by_page: [],
-      currentPage: 1
+      filteredData: []
     };
   },
+  filters: {},
   computed: {
-    covert_to_pageData() {
-      this.apiData_by_page = this.searchResult;
-      return this.apiData_by_page;
+    //回傳關鍵字搜尋的結果
+    filterBySearch() {
+      let searchTerm = this.searchTerm;
+      let data = this.apiData;
+
+      if (!searchTerm) {
+        return data;
+      } else {
+        // searchTerm有值，則過濾比對每一筆的Name跟Description
+        return data.filter(item => {
+          return (
+            item.Name.includes(searchTerm) ||
+            item.Description.includes(searchTerm)
+          );
+        });
+      }
     }
   },
   methods: {
@@ -105,46 +98,11 @@ export default {
     },
     searchZone(zone) {
       if (zone) {
-        this.searchResult = this.apiData.filter(item => {
+        this.filteredData = this.apiData.filter(item => {
           return item.Zone === zone;
         });
       } else {
-        this.searchResult = this.apiData;
-      }
-    },
-    handleCurrentChange(currentPage) {
-      console.log(`当前页: ${currentPage}`);
-      console.log(this.searchResult);
-
-      // 用currenPage跟pageSize去filter searchResult
-      this.searchResult = this.searchResult.filter((item, idx) => {
-        //  抓出對應目前頁面的item
-        //  (currentPage-1)*pageSize<= idx < currentPage*pageSize
-        console.log(idx);
-        if (
-          idx >= (currentPage - 1) * this.pageSize &&
-          idx < currentPage * this.pageSize
-        ) {
-          return item;
-        }
-      });
-    }
-  },
-  watch: {
-    searchTerm: function(newText, oldText) {
-      // 若searchBar清空，則用原本資料顯示
-      if (!newText) {
-        this.searchResult = this.apiData;
-      } else {
-        // searchTerm有值，則過濾
-        this.searchResult = this.apiData.filter(item => {
-          return (
-            item.Name.includes(newText) || item.Description.includes(newText)
-          );
-        });
-        // 回page1
-        this.handleCurrentChange(1);
-        this.currentPage = 1;
+        this.filteredData = this.apiData;
       }
     }
   }

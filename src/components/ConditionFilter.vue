@@ -25,13 +25,11 @@
     </div>
     <div class="fee border-bottom mb-5">
       <h3>收費</h3>
-
-      <el-switch
-        @change="handleCharge"
-        v-model="charge"
-        active-text="付費"
-        inactive-text="免費">
-      </el-switch>
+      <el-radio-group v-model="charge" @change="radioChange">
+        <el-radio :label="0">All</el-radio>
+        <el-radio :label="1">免費</el-radio>
+        <el-radio :label="2">收費</el-radio>
+      </el-radio-group>
 
     </div>
     <div class="opentime">
@@ -59,7 +57,7 @@ export default {
     return {
       address: "",
       zone: "",
-      charge: false,
+      charge: 0,
       date: ""
     };
   },
@@ -67,8 +65,8 @@ export default {
     searchZone(zone) {
       this.$emit("searchZone", zone);
     },
-    handleCharge(val) {
-      this.$emit("handleCharge", val);
+    radioChange(val) {
+      this.$emit("radioChange", val);
     }
   }
 };

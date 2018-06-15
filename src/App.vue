@@ -17,7 +17,7 @@
         <ConditionFilter 
           :zoneList="zoneList" 
           @searchZone="searchZone"
-          @handleCharge="handleCharge"/>
+          @radioChange="radioChange"/>
         <!-- 右邊顯示結果 -->
         <ResultList 
           :searchResult="filteredData ? filteredData : apiData" />
@@ -56,7 +56,7 @@ export default {
         }
       });
       //設定為免費
-      this.handleCharge(false);
+      this.radioChange(0);
     });
   },
   data() {
@@ -100,10 +100,11 @@ export default {
         });
       }
     },
-    handleCharge(val) {
+    radioChange(val) {
       console.log(val);
+      // 0:all,1:free,2:charge
       // true是有收費
-      if (val) {
+      if (val === 2) {
         console.log("收費");
         this.filteredData = this.apiData.filter(item => {
           return item.Ticketinfo !== "免費參觀" && item.Ticketinfo !== "";
